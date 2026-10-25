@@ -2,7 +2,7 @@
 import { getImage, Image } from 'astro:assets';
 import heroDarkImage from '../assets/portfolio/workstation-hero.png';
 import heroLightImage from '../assets/portfolio/workstation-hero-light.png';
-import avatarImage from '../assets/portfolio/mountain-avatar.png';
+import toolkitImage from '../assets/portfolio/backend-infrastructure.png';
 import { siteIdentity } from '../config/site';
 import { portfolioContent, type Locale } from '../data/portfolio';
 import Icon from './Icon.astro';
@@ -313,8 +313,8 @@ const contacts = [
 				</article>
 
 				<aside class="overflow-hidden rounded-3xl border border-line bg-panel shadow-card" aria-labelledby="skills-title">
-					<div class="relative h-36 overflow-hidden border-b border-line">
-						<Image src={avatarImage} alt="" width={640} height={320} widths={[320, 480, 640]} sizes="(min-width: 1280px) 480px, (min-width: 1024px) 40vw, 100vw" format="webp" quality={76} loading="lazy" class="size-full object-cover" />
+					<div class="relative h-48 overflow-hidden border-b border-line bg-soft sm:h-52">
+						<Image src={toolkitImage} alt="" width={640} height={640} widths={[320, 480, 640]} sizes="(min-width: 1280px) 480px, (min-width: 1024px) 40vw, 100vw" format="webp" quality={80} loading="lazy" class="size-full object-contain p-3 sm:p-4" />
 						<div class="absolute inset-0 bg-gradient-to-t from-panel via-transparent to-transparent"></div>
 					</div>
 					<div class="p-6 sm:p-8">

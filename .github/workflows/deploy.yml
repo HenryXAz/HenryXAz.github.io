@@ -21,7 +21,7 @@ jobs:
       - name: Build and upload Astro site
         uses: withastro/action@v6
         env:
-          PUBLIC_SITE_URL: https://henryxaz/github.io
+          PUBLIC_SITE_URL: https://henryxaz.github.io
   
   deploy:
     needs: build

@@ -1,0 +1,461 @@
+---
+import { getImage, Image } from 'astro:assets';
+import heroDarkImage from '../assets/portfolio/workstation-hero.png';
+import heroLightImage from '../assets/portfolio/workstation-hero-light.png';
+import avatarImage from '../assets/portfolio/mountain-avatar.png';
+import { siteIdentity } from '../config/site';
+import { portfolioContent, type Locale } from '../data/portfolio';
+import Icon from './Icon.astro';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const content = portfolioContent[locale];
+const otherLocale = locale === 'en' ? 'es' : 'en';
+const otherLocaleHref = locale === 'en' ? '/es/' : '/';
+const homeHref = locale === 'en' ? '/' : '/es/';
+const currentYear = new Date().getFullYear();
+const heroWidths = [640, 1024, 1672];
+const [heroLightVariants, heroDarkVariants] = await Promise.all([
+	Promise.all(heroWidths.map((width) => getImage({ src: heroLightImage, width, format: 'webp', quality: 78 }))),
+	Promise.all(heroWidths.map((width) => getImage({ src: heroDarkImage, width, format: 'webp', quality: 78 }))),
+]);
+const toSrcset = (variants: typeof heroLightVariants) => variants
+	.map((image, index) => `${image.src} ${heroWidths[index]}w`)
+	.join(', ');
+const heroLightSrcset = toSrcset(heroLightVariants);
+const heroDarkSrcset = toSrcset(heroDarkVariants);
+
+const navItems = [
+	{ href: '#services', label: content.nav.services },
+	{ href: '#experience', label: content.nav.experience },
+	{ href: '#work', label: content.nav.work },
+	{ href: '#about', label: content.nav.about },
+	{ href: '#contact', label: content.nav.contact },
+];
+
+const contacts = [
+	{ icon: 'mail', label: content.contact.email, value: siteIdentity.email, href: `mailto:${siteIdentity.email}`, external: false },
+	{ icon: 'linkedin', label: content.contact.linkedin, value: 'linkedin.com/in/henry-gustavo-xitimul-az', href: siteIdentity.profiles.linkedin, external: true },
+	{ icon: 'github', label: content.contact.github, value: 'github.com/HenryXAz', href: siteIdentity.profiles.github, external: true },
+];
+---
+
+<div id="top" class="min-h-screen overflow-x-clip bg-page text-ink transition-colors duration-300">
+	<a
+		href="#main-content"
+		class="sr-only z-[60] rounded-lg bg-brand px-4 py-2 font-semibold text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4 dark:text-page"
+	>
+		{locale === 'en' ? 'Skip to content' : 'Saltar al contenido'}
+	</a>
+
+	<header data-site-header class="sticky top-0 z-50 border-b border-line bg-page/90 backdrop-blur-xl">
+		<div class="mx-auto flex h-18 max-w-7xl items-center justify-between gap-3 px-5 sm:px-8 lg:px-10">
+			<a
+				href={homeHref}
+				class="shrink-0 whitespace-nowrap text-base font-extrabold tracking-tight text-ink focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand sm:text-lg"
+			>
+				<!-- Henry <span class="text-brand">Xitimul</span> -->
+				<span class=text-brand>Henry </span> Gustavo Xitimul
+			</a>
+
+			<nav class="hidden items-center gap-5 lg:flex xl:gap-7" aria-label={locale === 'en' ? 'Primary navigation' : 'Navegación principal'}>
+				{navItems.map((item) => (
+					<a class="text-sm font-medium text-muted transition-colors hover:text-brand focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" href={item.href}>
+						{item.label}
+					</a>
+				))}
+			</nav>
+
+			<div class="flex items-center gap-1.5 sm:gap-2">
+				<div class="flex items-center rounded-full border border-line bg-panel p-1 text-xs font-bold shadow-sm" aria-label={locale === 'en' ? 'Language' : 'Idioma'}>
+					<a
+						href={locale === 'en' ? '/' : otherLocaleHref}
+						aria-current={locale === 'en' ? 'page' : undefined}
+						class:list={[
+							'rounded-full px-2 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+							locale === 'en' ? 'bg-brand text-white dark:text-page' : 'text-muted hover:text-ink',
+						]}
+					>EN</a>
+					<a
+						href={locale === 'es' ? '/es/' : otherLocaleHref}
+						aria-current={locale === 'es' ? 'page' : undefined}
+						class:list={[
+							'rounded-full px-2 py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+							locale === 'es' ? 'bg-brand text-white dark:text-page' : 'text-muted hover:text-ink',
+						]}
+					>ES</a>
+				</div>
+
+				<button
+					type="button"
+					data-theme-toggle
+					data-label-to-light={content.controls.themeToLight}
+					data-label-to-dark={content.controls.themeToDark}
+					class="grid size-10 place-items-center rounded-full border border-line bg-panel text-muted shadow-sm transition hover:border-brand hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+					aria-label={content.controls.themeToDark}
+				>
+					<Icon name="moon" class="size-5 dark:hidden" />
+					<Icon name="sun" class="hidden size-5 dark:block" />
+				</button>
+
+				<button
+					type="button"
+					data-menu-toggle
+					data-label-open={content.controls.menuOpen}
+					data-label-close={content.controls.menuClose}
+					class="grid size-10 place-items-center rounded-full border border-line bg-panel text-muted shadow-sm transition hover:border-brand hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand lg:hidden"
+					aria-label={content.controls.menuOpen}
+					aria-controls="mobile-navigation"
+					aria-expanded="false"
+				>
+					<span data-menu-open-icon><Icon name="menu" class="size-5" /></span>
+					<span data-menu-close-icon hidden><Icon name="x" class="size-5" /></span>
+				</button>
+			</div>
+		</div>
+
+		<nav id="mobile-navigation" data-mobile-navigation hidden class="border-t border-line bg-page px-5 py-4 lg:hidden" aria-label={locale === 'en' ? 'Mobile navigation' : 'Navegación móvil'}>
+			<div class="mx-auto grid max-w-7xl gap-1">
+				{navItems.map((item) => (
+					<a class="rounded-xl px-4 py-3 text-sm font-semibold text-muted transition hover:bg-soft hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand" href={item.href}>
+						{item.label}
+					</a>
+				))}
+			</div>
+		</nav>
+	</header>
+
+	<main id="main-content">
+		<section class="relative isolate overflow-hidden border-b border-line">
+			<img
+				data-hero-image
+				data-light-src={heroLightVariants.at(-1)?.src}
+				data-light-srcset={heroLightSrcset}
+				data-dark-src={heroDarkVariants.at(-1)?.src}
+				data-dark-srcset={heroDarkSrcset}
+				src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+				alt=""
+				width="1672"
+				height="941"
+				sizes="100vw"
+				loading="eager"
+				fetchpriority="high"
+				decoding="async"
+				class="absolute inset-0 -z-20 size-full object-cover object-[62%_center] opacity-75 dark:opacity-85"
+			/>
+			<script is:inline>
+				(() => {
+					const image = document.querySelector('[data-hero-image]');
+					if (!(image instanceof HTMLImageElement)) return;
+					const isDark = document.documentElement.dataset.theme === 'dark';
+					image.srcset = isDark ? image.dataset.darkSrcset : image.dataset.lightSrcset;
+					image.src = isDark ? image.dataset.darkSrc : image.dataset.lightSrc;
+				})();
+			</script>
+			<noscript>
+				<Image src={heroLightImage} alt="" width={1672} height={941} format="webp" quality={78} class="absolute inset-0 -z-20 size-full object-cover object-[62%_center] opacity-75" />
+			</noscript>
+			<div class="absolute inset-0 -z-10 bg-gradient-to-r from-page via-page/95 to-page/35 dark:via-page/90 dark:to-page/20"></div>
+			<div class="absolute inset-0 -z-10 bg-gradient-to-t from-page via-transparent to-transparent"></div>
+
+			<div class="mx-auto flex min-h-[580px] max-w-7xl items-center px-5 py-16 sm:px-8 sm:py-20 lg:min-h-[620px] lg:px-10">
+				<div class="max-w-3xl">
+					<div class="mb-6 inline-flex items-center gap-2 rounded-full border border-success/25 bg-success-soft/85 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-success backdrop-blur-sm">
+						<span class="size-2 rounded-full bg-success shadow-[0_0_14px_var(--brand-green)]"></span>
+						{content.hero.availability}
+					</div>
+
+					<h1 class="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.045em] text-ink sm:text-5xl lg:text-6xl">
+						{content.hero.titleStart}<br />
+						<span class="text-brand">{content.hero.titleAccent}</span>
+					</h1>
+					<p class="mt-6 max-w-2xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
+						{content.hero.description}
+					</p>
+
+					<div class="mt-8 flex flex-col gap-3 sm:flex-row">
+						<a href="#work" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand/20 transition hover:-translate-y-0.5 hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-page dark:text-page">
+							{content.hero.viewWork}<Icon name="arrow-right" class="size-4" />
+						</a>
+						<a href="#contact" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-success bg-page/75 px-6 py-3 text-sm font-bold text-ink backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-success-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 focus-visible:ring-offset-page">
+							<Icon name="send" class="size-4 text-success" />{content.hero.contact}
+						</a>
+					</div>
+
+					<ul class="mt-7 flex flex-wrap gap-2" aria-label={locale === 'en' ? 'Core technologies' : 'Tecnologías principales'}>
+						{content.hero.technologies.map((technology) => (
+							<li class="rounded-full border border-line bg-panel/85 px-4 py-2 text-xs font-semibold text-muted shadow-sm backdrop-blur-sm">{technology}</li>
+						))}
+					</ul>
+				</div>
+
+				<div class="absolute bottom-10 right-[max(2rem,calc((100vw-80rem)/2+2.5rem))] hidden max-w-48 border-l-2 border-success pl-5 text-xs font-semibold uppercase leading-6 tracking-[0.22em] text-white/75 xl:block">
+					{content.hero.imageLabel}
+				</div>
+			</div>
+		</section>
+
+		<section id="services" class="scroll-mt-24 border-b border-line py-16 sm:py-20">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+				<div class="mb-10 max-w-3xl">
+					<p class="text-xs font-bold uppercase tracking-[0.2em] text-success">{content.services.eyebrow}</p>
+					<h2 class="mt-3 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{content.services.title}</h2>
+					<p class="mt-4 text-base leading-7 text-muted">{content.services.description}</p>
+				</div>
+
+				<div class="grid gap-5 lg:grid-cols-2">
+					{content.services.items.map((service, index) => (
+						<article class="group rounded-2xl border border-line bg-panel p-6 shadow-card transition hover:-translate-y-1 hover:border-brand/50 sm:p-7">
+							<div class:list={['mb-5 grid size-12 place-items-center rounded-2xl', index % 2 === 1 ? 'bg-success-soft text-success' : 'bg-brand/10 text-brand']}>
+								<Icon name={service.icon} class="size-6" />
+							</div>
+							<h3 class="text-lg font-bold text-ink">{service.title}</h3>
+							<dl class="mt-5 grid gap-3 text-sm leading-6">
+								<div><dt class="font-bold text-ink">{content.services.labels.problem}</dt><dd class="text-muted">{service.problem}</dd></div>
+								<div><dt class="font-bold text-ink">{content.services.labels.work}</dt><dd class="text-muted">{service.work}</dd></div>
+								<div class="border-t border-line pt-3"><dt class="font-bold text-success">{content.services.labels.outcome}</dt><dd class="text-muted">{service.outcome}</dd></div>
+							</dl>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section id="experience" class="scroll-mt-24 border-b border-line bg-panel/35 py-16 sm:py-20">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+				<div class="mb-10 max-w-3xl">
+					<p class="text-xs font-bold uppercase tracking-[0.2em] text-success">{content.experience.eyebrow}</p>
+					<h2 class="mt-3 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{content.experience.title}</h2>
+					<p class="mt-4 text-base leading-7 text-muted">{content.experience.description}</p>
+				</div>
+				<div class="grid gap-5 lg:grid-cols-3">
+					{content.experience.items.map((item, index) => (
+						<article class="flex h-full flex-col rounded-2xl border border-line bg-page p-6 shadow-card">
+							<div class="flex items-start gap-4">
+								<div class:list={['grid size-10 shrink-0 place-items-center rounded-full text-sm font-extrabold', index === 1 ? 'bg-success-soft text-success' : 'bg-brand/10 text-brand']}>{String(index + 1).padStart(2, '0')}</div>
+								<div><h3 class="font-bold text-ink">{item.title}</h3><p class="mt-1 text-xs font-semibold text-brand">{item.collaboration}</p></div>
+							</div>
+							<p class="mt-5 border-l-2 border-success pl-3 text-xs font-semibold leading-5 text-muted">{item.context}</p>
+							<div class="mt-5 grid gap-4 text-sm leading-6 text-muted">
+								<div><h4 class="mb-1 font-bold text-ink">{content.experience.labels.responsibilities}</h4><ul class="list-disc space-y-1 pl-4">{item.responsibilities.map((entry) => <li>{entry}</li>)}</ul></div>
+								<div><h4 class="mb-1 font-bold text-ink">{content.experience.labels.contributions}</h4><ul class="list-disc space-y-1 pl-4">{item.contributions.map((entry) => <li>{entry}</li>)}</ul></div>
+							</div>
+							<ul class="mt-5 flex flex-wrap gap-2" aria-label={locale === 'en' ? 'Relevant technologies' : 'Tecnologías relevantes'}>{item.tags.map((tag) => <li class="rounded-full bg-soft px-3 py-1 text-[0.7rem] font-semibold text-muted">{tag}</li>)}</ul>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section class="border-b border-line py-16 sm:py-20">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+				<div class="mb-10 max-w-3xl">
+					<p class="text-xs font-bold uppercase tracking-[0.2em] text-success">{content.process.eyebrow}</p>
+					<h2 class="mt-3 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{content.process.title}</h2>
+					<p class="mt-4 text-base leading-7 text-muted">{content.process.description}</p>
+				</div>
+				<ol class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+					{content.process.items.map((step, index) => (
+						<li class="relative border-l border-line pl-5 lg:border-l-0 lg:border-t lg:pl-0 lg:pt-6">
+							<span class="mb-4 grid size-9 place-items-center rounded-full bg-brand text-sm font-extrabold text-white lg:absolute lg:-top-[1.15rem] dark:text-page">{index + 1}</span>
+							<h3 class="font-bold text-ink">{step.title}</h3>
+							<p class="mt-2 text-sm leading-6 text-muted">{step.description}</p>
+						</li>
+					))}
+				</ol>
+			</div>
+		</section>
+
+		<section id="work" class="scroll-mt-24 border-b border-line bg-panel/35 py-16 sm:py-20">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+				<div class="mb-10 max-w-3xl">
+					<p class="text-xs font-bold uppercase tracking-[0.2em] text-success">{content.work.eyebrow}</p>
+					<h2 class="mt-3 text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{content.work.title}</h2>
+					<p class="mt-4 text-base leading-7 text-muted">{content.work.description}</p>
+				</div>
+
+				<div class="grid gap-5 lg:grid-cols-2">
+					{content.work.items.map((project, index) => (
+						<article class:list={['rounded-2xl border border-line bg-page p-6 shadow-card sm:p-7', index === 0 && 'lg:col-span-2']}>
+							<div class="flex items-start gap-4">
+								<div class:list={['grid size-12 shrink-0 place-items-center rounded-xl', index === 1 ? 'bg-success-soft text-success' : 'bg-brand/10 text-brand']}><Icon name={project.icon} class="size-6" /></div>
+								<div><h3 class="text-lg font-bold text-ink">{project.title}</h3>{project.note && <p class="mt-1 text-xs font-semibold text-success">{project.note}</p>}</div>
+							</div>
+							<p class="mt-5 text-sm leading-6 text-muted">{project.summary}</p>
+							<ul class="mt-5 flex flex-wrap gap-2" aria-label={locale === 'en' ? 'Technologies used' : 'Tecnologías utilizadas'}>
+								{project.tags.map((tag) => <li class="rounded-full bg-soft px-3 py-1.5 text-[0.7rem] font-semibold text-muted">{tag}</li>)}
+							</ul>
+							<details class="group mt-5 border-t border-line pt-4">
+								<summary class="flex cursor-pointer list-none items-center justify-between gap-3 rounded-lg text-sm font-bold text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"><span>{content.work.viewCaseStudy}</span><Icon name="arrow-right" class="size-4 transition-transform group-open:rotate-90" /></summary>
+								<dl class:list={['mt-5 grid gap-4 text-sm leading-6', index === 0 && 'md:grid-cols-2']}>
+									{Object.entries(content.work.labels).map(([key, label]) => (
+										<div class="rounded-xl bg-raised p-4"><dt class="font-bold text-ink">{label}</dt><dd class="mt-1 text-muted">{project[key as keyof typeof content.work.labels]}</dd></div>
+									))}
+								</dl>
+							</details>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section id="about" class="scroll-mt-24 py-16 sm:py-20">
+			<div class="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:px-10">
+				<article class="rounded-3xl border border-line bg-panel p-6 shadow-card sm:p-8">
+					<p class="text-xs font-bold uppercase tracking-[0.2em] text-success">{content.about.eyebrow}</p>
+					<h2 class="mt-3 max-w-2xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{content.about.title}</h2>
+					<div class="mt-7 space-y-4 text-sm leading-7 text-muted sm:text-base">
+						{content.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+					</div>
+				</article>
+
+				<aside class="overflow-hidden rounded-3xl border border-line bg-panel shadow-card" aria-labelledby="skills-title">
+					<div class="relative h-36 overflow-hidden border-b border-line">
+						<Image src={avatarImage} alt="" width={640} height={320} widths={[320, 480, 640]} sizes="(min-width: 1280px) 480px, (min-width: 1024px) 40vw, 100vw" format="webp" quality={76} loading="lazy" class="size-full object-cover" />
+						<div class="absolute inset-0 bg-gradient-to-t from-panel via-transparent to-transparent"></div>
+					</div>
+					<div class="p-6 sm:p-8">
+						<h3 id="skills-title" class="text-xs font-bold uppercase tracking-[0.2em] text-success">{content.about.skillsLabel}</h3>
+						<dl class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+							{content.about.skills.map((group) => <div><dt class="text-sm font-bold text-ink">{group.title}</dt><dd class="mt-1 text-xs leading-5 text-muted">{group.items}</dd></div>)}
+						</dl>
+					</div>
+				</aside>
+			</div>
+		</section>
+
+		<section id="contact" class="scroll-mt-24 border-t border-line bg-panel/35 py-16 sm:py-20">
+			<div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+				<article class="rounded-3xl border border-line bg-panel p-6 shadow-card sm:p-8 lg:p-10">
+					<div class="flex flex-wrap items-center justify-between gap-3">
+						<p class="text-xs font-bold uppercase tracking-[0.2em] text-success">{content.contact.eyebrow}</p>
+						<div class="flex items-center gap-2 text-xs font-semibold text-muted">
+							<span class="size-2 rounded-full bg-success shadow-[0_0_12px_var(--brand-green)]"></span>
+							{content.contact.availability}
+						</div>
+					</div>
+					<h2 class="mt-3 max-w-3xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">{content.contact.title}</h2>
+					<p class="mt-4 max-w-3xl text-base leading-7 text-muted">{content.contact.description}</p>
+
+					<div class="mt-8 grid gap-3 md:grid-cols-3">
+						{contacts.map((contact) => (
+							<a
+								href={contact.href}
+								target={contact.external ? '_blank' : undefined}
+								rel={contact.external ? 'noreferrer' : undefined}
+								class="group flex min-w-0 items-center gap-3 rounded-xl border border-line bg-raised p-4 transition hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+							>
+								<div class="grid size-10 shrink-0 place-items-center rounded-lg bg-brand/10 text-brand">
+									<Icon name={contact.icon} class="size-5" />
+								</div>
+								<div class="min-w-0 grow">
+									<p class="text-xs font-bold text-ink">{contact.label}</p>
+									<p class="truncate text-xs text-brand">{contact.value}</p>
+								</div>
+								<Icon name="arrow-right" class="size-4 shrink-0 text-brand transition-transform group-hover:translate-x-0.5" />
+							</a>
+						))}
+					</div>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<footer class="border-t border-line">
+		<div class="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
+			<div>
+				<p>© {currentYear} Henry Gustavo Xitimul Az.</p>
+				<p class="mt-1 text-xs">{content.footer.builtWith}</p>
+			</div>
+			<a href="#top" class="inline-flex items-center gap-2 font-semibold transition hover:text-brand focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">
+				{content.footer.backToTop}<Icon name="arrow-up" class="size-4" />
+			</a>
+		</div>
+	</footer>
+</div>
+
+<script>
+	const root = document.documentElement;
+	const themeButton = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+	const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+	const heroImage = document.querySelector<HTMLImageElement>('[data-hero-image]');
+
+	const syncHeroImage = () => {
+		if (!heroImage) return;
+		const isDark = root.dataset.theme === 'dark';
+		const nextSrc = isDark ? heroImage.dataset.darkSrc : heroImage.dataset.lightSrc;
+		const nextSrcset = isDark ? heroImage.dataset.darkSrcset : heroImage.dataset.lightSrcset;
+		if (nextSrcset) heroImage.srcset = nextSrcset;
+		if (nextSrc && heroImage.src !== new URL(nextSrc, window.location.href).href) heroImage.src = nextSrc;
+	};
+
+	const syncThemeControl = () => {
+		if (!themeButton) return;
+		const isDark = root.dataset.theme === 'dark';
+		const label = isDark ? themeButton.dataset.labelToLight : themeButton.dataset.labelToDark;
+		if (label) {
+			themeButton.setAttribute('aria-label', label);
+			themeButton.title = label;
+		}
+		themeButton.setAttribute('aria-pressed', String(isDark));
+		if (themeColor) themeColor.content = isDark ? '#071019' : '#f2f6fb';
+	};
+
+	const applyTheme = (theme: 'light' | 'dark', persist = false) => {
+		root.dataset.theme = theme;
+		root.style.colorScheme = theme;
+		syncHeroImage();
+		if (persist) {
+			try { localStorage.setItem('portfolio-theme', theme); } catch {}
+		}
+		syncThemeControl();
+	};
+
+	themeButton?.addEventListener('click', () => {
+		applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true);
+	});
+
+	const colorPreference = window.matchMedia('(prefers-color-scheme: dark)');
+	colorPreference.addEventListener('change', (event) => {
+		try {
+			if (!localStorage.getItem('portfolio-theme')) applyTheme(event.matches ? 'dark' : 'light');
+		} catch {
+			applyTheme(event.matches ? 'dark' : 'light');
+		}
+	});
+
+	syncThemeControl();
+
+	const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+	const mobileNavigation = document.querySelector<HTMLElement>('[data-mobile-navigation]');
+	const openIcon = menuButton?.querySelector<HTMLElement>('[data-menu-open-icon]');
+	const closeIcon = menuButton?.querySelector<HTMLElement>('[data-menu-close-icon]');
+
+	const setMenu = (open: boolean) => {
+		if (!menuButton || !mobileNavigation) return;
+		mobileNavigation.hidden = !open;
+		menuButton.setAttribute('aria-expanded', String(open));
+		const label = open ? menuButton.dataset.labelClose : menuButton.dataset.labelOpen;
+		if (label) menuButton.setAttribute('aria-label', label);
+		if (openIcon) openIcon.hidden = open;
+		if (closeIcon) closeIcon.hidden = !open;
+	};
+
+	menuButton?.addEventListener('click', () => {
+		setMenu(menuButton.getAttribute('aria-expanded') !== 'true');
+	});
+
+	mobileNavigation?.querySelectorAll('a').forEach((link) => {
+		link.addEventListener('click', () => setMenu(false));
+	});
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && menuButton?.getAttribute('aria-expanded') === 'true') {
+			setMenu(false);
+			menuButton.focus();
+		}
+	});
+</script>

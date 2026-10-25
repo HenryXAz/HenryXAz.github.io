@@ -1,23 +1,76 @@
+---
+import '../styles/global.css';
+import SEO from '../components/SEO.astro';
+
+interface Props {
+	lang: 'en' | 'es';
+	title: string;
+	description: string;
+	path: string;
+	alternatePath?: string;
+	robots?: string;
+	canonical?: boolean;
+	structuredData?: Record<string, unknown> | Record<string, unknown>[] | false;
+}
+
+const {
+	lang,
+	title,
+	description,
+	path,
+	alternatePath,
+	robots,
+	canonical,
+	structuredData,
+} = Astro.props;
+const alternatePaths = alternatePath
+	? lang === 'en' ? { en: path, es: alternatePath } : { en: alternatePath, es: path }
+	: false;
+---
+
 <!doctype html>
-<html lang="en">
+<html lang={lang} data-theme="light">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<meta name="theme-color" content="#f2f6fb" />
+		<SEO
+			{lang}
+			{title}
+			{description}
+			{path}
+			{alternatePaths}
+			{robots}
+			canonical={canonical ?? true}
+			{structuredData}
+		/>
+		<script is:inline>
+			(() => {
+				const root = document.documentElement;
+				let theme = 'light';
+
+				try {
+					const stored = localStorage.getItem('portfolio-theme');
+					theme = stored === 'light' || stored === 'dark'
+						? stored
+						: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				} catch {
+					theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				}
+
+				root.dataset.theme = theme;
+				root.style.colorScheme = theme;
+				document.querySelector('meta[name="theme-color"]')?.setAttribute(
+					'content',
+					theme === 'dark' ? '#071019' : '#f2f6fb',
+				);
+			})();
+		</script>
 	</head>
 	<body>
 		<slot />
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

@@ -1,0 +1,120 @@
+---
+import { getImage, type ImageMetadata } from 'astro:assets';
+import defaultSocialImage from '../assets/portfolio/workstation-hero-light.png';
+import { siteIdentity } from '../config/site';
+
+type Locale = keyof typeof siteIdentity.locales;
+type StructuredData = Record<string, unknown> | Record<string, unknown>[];
+
+interface Props {
+	title: string;
+	description: string;
+	lang: Locale;
+	path: string;
+	alternatePaths?: Partial<Record<Locale, string>> | false;
+	robots?: string;
+	canonical?: boolean;
+	type?: 'website' | 'article';
+	socialImage?: ImageMetadata;
+	socialImageAlt?: string;
+	structuredData?: StructuredData | false;
+}
+
+const {
+	title,
+	description,
+	lang,
+	path,
+	alternatePaths = { en: '/', es: '/es/' },
+	robots = 'index, follow',
+	canonical = true,
+	type = 'website',
+	socialImage = defaultSocialImage,
+	socialImageAlt = lang === 'en'
+		? 'Abstract workstation illustration in the visual style of Henry Xitimul’s portfolio'
+		: 'Ilustración abstracta de una estación de trabajo con el estilo visual del portfolio de Henry Xitimul',
+	structuredData,
+} = Astro.props;
+
+const site = Astro.site;
+const normalizePath = (value: string) => value === '/' || value.endsWith('/') ? value : `${value}/`;
+const canonicalUrl = site && canonical ? new URL(normalizePath(path), site) : undefined;
+const alternateUrls = site && alternatePaths !== false
+	? Object.entries(alternatePaths).map(([locale, localePath]) => ({
+		locale: locale as Locale,
+		url: new URL(normalizePath(localePath), site),
+	}))
+	: [];
+
+const optimizedSocialImage = await getImage({
+	src: socialImage,
+	width: 1200,
+	height: 630,
+	fit: 'cover',
+	position: 'center',
+	format: 'jpg',
+	quality: 82,
+});
+const socialImageUrl = site ? new URL(optimizedSocialImage.src, site) : undefined;
+
+const defaultStructuredData: StructuredData | undefined = canonicalUrl ? {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'Person',
+			'@id': new URL('/#person', site).href,
+			name: siteIdentity.fullName,
+			url: new URL('/', site).href,
+			jobTitle: lang === 'en' ? 'Backend and Full-Stack Developer' : 'Desarrollador Backend y Full-Stack',
+			sameAs: [siteIdentity.profiles.linkedin, siteIdentity.profiles.github],
+			knowsAbout: ['PHP', 'Laravel', 'MySQL', 'REST APIs', 'Docker', 'Linux', lang === 'en' ? 'Business applications' : 'Aplicaciones empresariales'],
+		},
+		{
+			'@type': 'WebSite',
+			'@id': new URL('/#website', site).href,
+			url: new URL('/', site).href,
+			name: siteIdentity.name,
+			inLanguage: ['en', 'es'],
+			author: { '@id': new URL('/#person', site).href },
+		},
+	],
+} : undefined;
+
+const resolvedStructuredData = structuredData === false
+	? undefined
+	: structuredData ?? defaultStructuredData;
+const serializedStructuredData = resolvedStructuredData
+	? JSON.stringify(resolvedStructuredData).replace(/</g, '\\u003c')
+	: undefined;
+const ogLocale = siteIdentity.locales[lang];
+const alternateOgLocale = siteIdentity.locales[lang === 'en' ? 'es' : 'en'];
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="robots" content={robots} />
+
+{canonicalUrl && <link rel="canonical" href={canonicalUrl.href} />}
+{alternateUrls.map(({ locale, url }) => <link rel="alternate" hreflang={locale} href={url.href} />)}
+{site && alternatePaths !== false && <link rel="alternate" hreflang="x-default" href={new URL('/', site).href} />}
+{site && <link rel="sitemap" href={new URL('/sitemap-index.xml', site).href} />}
+
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:site_name" content={siteIdentity.name} />
+<meta property="og:locale" content={ogLocale} />
+<meta property="og:locale:alternate" content={alternateOgLocale} />
+{canonicalUrl && <meta property="og:url" content={canonicalUrl.href} />}
+{socialImageUrl && <meta property="og:image" content={socialImageUrl.href} />}
+{socialImageUrl && <meta property="og:image:width" content="1200" />}
+{socialImageUrl && <meta property="og:image:height" content="630" />}
+{socialImageUrl && <meta property="og:image:alt" content={socialImageAlt} />}
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{socialImageUrl && <meta name="twitter:image" content={socialImageUrl.href} />}
+{socialImageUrl && <meta name="twitter:image:alt" content={socialImageAlt} />}
+
+{serializedStructuredData && <script type="application/ld+json" set:html={serializedStructuredData} />}

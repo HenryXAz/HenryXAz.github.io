@@ -1,0 +1,11 @@
+---
+import Portfolio from '../../components/Portfolio.astro';
+import Layout from '../../layouts/Layout.astro';
+import { portfolioContent } from '../../data/portfolio';
+
+const page = portfolioContent.es;
+---
+
+<Layout lang="es" title={page.meta.title} description={page.meta.description} path="/es/" alternatePath="/">
+	<Portfolio locale="es" />
+</Layout>

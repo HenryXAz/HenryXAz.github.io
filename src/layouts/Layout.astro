@@ -37,6 +37,39 @@ const alternatePaths = alternatePath
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="theme-color" content="#f2f6fb" />
+		<script id="language-preference" is:inline>
+			(() => {
+				const url = new URL(window.location.href);
+				if (!['/', '/es', '/es/'].includes(url.pathname)) return;
+
+				const isSupported = (language) => language === 'en' || language === 'es';
+				const explicitLanguage = url.searchParams.get('lang');
+				let preferredLanguage;
+
+				if (isSupported(explicitLanguage)) {
+					preferredLanguage = explicitLanguage;
+					try { localStorage.setItem('portfolio-language', preferredLanguage); } catch {}
+				} else {
+					// A direct Spanish URL takes precedence over automatic detection.
+					if (url.pathname !== '/') return;
+
+					try { preferredLanguage = localStorage.getItem('portfolio-language'); } catch {}
+					if (!isSupported(preferredLanguage)) {
+						const languages = navigator.languages?.length ? navigator.languages : [navigator.language];
+						preferredLanguage = languages
+							.map((language) => language?.toLowerCase().split('-')[0])
+							.find(isSupported) ?? 'en';
+					}
+				}
+
+				const targetPath = preferredLanguage === 'es' ? '/es/' : '/';
+				if (url.pathname !== targetPath) {
+					url.pathname = targetPath;
+					// Preserve incoming query parameters and section anchors without adding a history entry.
+					window.location.replace(url.href);
+				}
+			})();
+		</script>
 		<SEO
 			{lang}
 			{title}

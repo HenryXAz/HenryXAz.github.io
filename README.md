@@ -2,6 +2,10 @@
 
 Bilingual Astro portfolio focused on backend engineering, business applications, and software maintenance. English is served at `/` and Spanish at `/es/`.
 
+On visits to `/`, an early browser script selects the first supported language (`en` or `es`) in `navigator.languages`, with `navigator.language` as a fallback. Regional variants such as `es-GT` use Spanish; unsupported preferences fall back to English. An explicit EN/ES selection is saved in `localStorage` as `portfolio-language` and takes precedence on later visits to `/`. Direct `/es/` links remain Spanish.
+
+Language-switch links include `?lang=en` or `?lang=es` to make the choice explicit, including in new tabs or when storage is unavailable. Automatic redirects preserve query parameters and section anchors and use `location.replace` to avoid adding a redirect to browser history. Without JavaScript, both language links still work and `/` stays English. No geolocation service is used.
+
 ## Content and presentation
 
 - `src/data/portfolio.ts` contains typed English and Spanish copy for the hero, six capability cards, professional experience, engineering principles, selected work, About, technical ecosystem, and contact section. Update both locales together.
@@ -44,5 +48,6 @@ All commands are run from the root of the project, from a terminal:
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
+| `node --test tests/language-preference.test.mjs` | Checks language selection, saved choices, and redirects |
 
 To validate the same absolute SEO metadata as GitHub Pages, run `PUBLIC_SITE_URL=https://henryxaz.github.io npm run build`.

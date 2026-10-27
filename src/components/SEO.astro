@@ -65,9 +65,11 @@ const defaultStructuredData: StructuredData | undefined = canonicalUrl ? {
 			'@id': new URL('/#person', site).href,
 			name: siteIdentity.fullName,
 			url: new URL('/', site).href,
-			jobTitle: lang === 'en' ? 'Backend and Full-Stack Developer' : 'Desarrollador Backend y Full-Stack',
+			jobTitle: 'Backend / Software Engineer',
 			sameAs: [siteIdentity.profiles.linkedin, siteIdentity.profiles.github],
-			knowsAbout: ['PHP', 'Laravel', 'MySQL', 'REST APIs', 'Docker', 'Linux', lang === 'en' ? 'Business applications' : 'Aplicaciones empresariales'],
+			knowsAbout: lang === 'en'
+				? ['Backend engineering', 'Software architecture', 'REST APIs', 'System integration', 'Relational databases', 'Business applications', 'Software maintenance']
+				: ['Ingeniería backend', 'Arquitectura de software', 'APIs REST', 'Integración de sistemas', 'Bases de datos relacionales', 'Aplicaciones empresariales', 'Mantenimiento de software'],
 		},
 		{
 			'@type': 'WebSite',
